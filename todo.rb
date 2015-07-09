@@ -73,6 +73,7 @@ class Todo
 		sql = "DELETE FROM todos WHERE id=$1"
 		args = [id]
 		@c.exec_params(sql, args)
+		self
 	end
 
 	def self.delete_all
@@ -80,12 +81,16 @@ class Todo
 		c.exec "DELETE FROM todos"
 	end
 
-	def update(args)
+	def update
 		sql = "UPDATE todos SET item=$1 WHERE id=$2;"
-		args = [item]
+		args = [item, id]
 		@c.exec_params(sql, args)
+		self
 	end
 
+	def to_s
+		"ID: #{@id}. #{@item}"
+	end
 
 	def close
 		@c.close
@@ -103,8 +108,8 @@ puts "Welcome to the todo app, what would you like to do? Enter specified key fo
 o - see options
 n - make a new todo
 l - list all todos
-u [id] - update a todo with a given id
-d [id] - delete a todo with a given id, if no id is provided, all todos will be deleted
+u - update a todo with a given id
+d - delete a todo with a given id, if no id is provided, all todos will be deleted
 q - quit the application"
 
 input = gets.chomp
@@ -114,8 +119,8 @@ until input == "q"
 		o - see options
 		n - make a new todo
 		l - list all todos
-		u [id] - update a todo with a given id
-		d [id] - delete a todo with a given id, if no id is provided, all todos will be deleted
+		u - update a todo with a given id
+		d - delete a todo with a given id, if no id is provided, all todos will be deleted
 		q - quit the application}
 		input = gets.chomp
 	end
@@ -138,24 +143,24 @@ until input == "q"
 
 	if input == "u"
 		puts "Please enter the id of the todo you'd like to update:"
-		todo_id = gets.chomp
-		todo.find(todo_id)
+		todo_id = gets.chomp.to_i
+		# todo.find(todo_id)
 		puts "Please enter your updated todo:"
 		updated_todo = gets.chomp
-		todo.update(updated_todo)
+		u = Todo.new({:id => todo_id, :item => updated_todo})
+		u.update
 		puts "You've successfully updated a todo! Enter 'o' to return to options."
 		input = gets.chomp
 	end
 
 	if input == "d"
 		puts "Please enter the id of the todo you'd like to delete:"
-		todo_id = gets.chomp
+		todo_id = gets.chomp.to_i
 		if todo_id == nil
 			Todo.delete_all
 			puts "You've successfully deleted all todos! Enter 'o' to return to options."
 		else 
-			todo.find(todo_id)
-			todo.find(id)
+			# todo.find(todo_id)
 			todo.delete_one
 			puts "You've successfully deleted a todo! Enter 'o' to return to options."
 		end
