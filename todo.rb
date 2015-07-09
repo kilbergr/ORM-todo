@@ -87,4 +87,44 @@ class Todo
 end
 
 
+puts "Welcome to the todo app, what would you like to do? Enter specified key for following result.
+o - see options
+n - make a new todo
+l - list all todos
+u [id] - update a todo with a given id
+d [id] - delete a todo with a given id, if no id is provided, all todos will be deleted
+q - quit the application"
+
+input = gets.chomp
+while input == !q
+	if input == o
+		puts %q{Welcome to the todo app, what would you like to do? Enter specified key for following result.
+		o - see options
+		n - make a new todo
+		l - list all todos
+		u [id] - update a todo with a given id
+		d [id] - delete a todo with a given id, if no id is provided, all todos will be deleted
+		q - quit the application}
+		input = gets.chomp
+	end
+
+	if input == n
+		puts "Please enter the todo:"
+		new_todo = gets.chomp
+		todo = Todo.new({:id => id, :item => new_todo})
+		todo.save
+		puts "You've successfully added a todo! Enter 'o' to return to options."
+		input = gets.chomp
+	end
+
+	if input == l
+		puts Todo.all
+		puts "What next? Enter 'o' to return to options."
+		input = gets.chomp
+	end
+
+	if input == u[id]
+		
+	end
+end
 
