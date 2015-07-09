@@ -64,11 +64,6 @@ class Todo
 		results
 	end
 
-	def find(args)
-		sql = "SELECT item FROM todos WHERE id = $1;"
-		@c.exec_params(sql,args)
-	end
-
 	def delete_one
 		sql = "DELETE FROM todos WHERE id=$1"
 		args = [id]
@@ -144,7 +139,6 @@ until input == "q"
 	if input == "u"
 		puts "Please enter the id of the todo you'd like to update:"
 		todo_id = gets.chomp.to_i
-		# todo.find(todo_id)
 		puts "Please enter your updated todo:"
 		updated_todo = gets.chomp
 		u = Todo.new({:id => todo_id, :item => updated_todo})
@@ -154,13 +148,13 @@ until input == "q"
 	end
 
 	if input == "d"
-		puts "Please enter the id of the todo you'd like to delete:"
-		todo_id = gets.chomp.to_i
-		if todo_id == nil
+		puts "Please enter the id of the todo you'd like to delete. Enter 'ALL' to delete all:"
+		id_or_all = gets.chomp.to_i
+		if id_or_all == 'ALL'
 			Todo.delete_all
 			puts "You've successfully deleted all todos! Enter 'o' to return to options."
 		else 
-			# todo.find(todo_id)
+			todo = Todo.new({:id => id_or_all})
 			todo.delete_one
 			puts "You've successfully deleted a todo! Enter 'o' to return to options."
 		end
