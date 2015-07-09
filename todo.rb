@@ -48,7 +48,7 @@ class Todo
 		end
 
 		if args.has_key? :item
-			@title = args[:item]
+			@item = args[:item]
 		end
 	end
 
@@ -64,17 +64,23 @@ class Todo
 		results
 	end
 
+	def find(args)
+		sql = "SELECT item FROM todos WHERE id = $1;"
+		@c.exec_params(sql,args)
+	end
+
 	def delete
 		sql = "DELETE FROM todos WHERE id=$1"
 		args = [id]
 		@c.exec_params(sql, args)
 	end
 
-	def update
+	def update(args)
 		sql = "UPDATE todos SET item=$1 WHERE id=$2;"
-		args = [item, id]
+		args = [item]
 		@c.exec_params(sql, args)
 	end
+
 
 	def close
 		@c.close
@@ -96,7 +102,7 @@ d [id] - delete a todo with a given id, if no id is provided, all todos will be 
 q - quit the application"
 
 input = gets.chomp
-while input == !q
+until input == q
 	if input == o
 		puts %q{Welcome to the todo app, what would you like to do? Enter specified key for following result.
 		o - see options
@@ -113,6 +119,7 @@ while input == !q
 		new_todo = gets.chomp
 		todo = Todo.new({:id => id, :item => new_todo})
 		todo.save
+		todo.close
 		puts "You've successfully added a todo! Enter 'o' to return to options."
 		input = gets.chomp
 	end
@@ -124,7 +131,20 @@ while input == !q
 	end
 
 	if input == u[id]
-		
+		todo.find(id)
+		puts "Please enter your updated todo:"
+		updated_todo = gets.chomp
+		todo.update(updated_todo)
+		puts "You've successfully updated a todo! Enter 'o' to return to options."
+		input = gets.chomp
 	end
+
+	if input == d[id]
+		todo.find(id)
+		todo.delete
+		puts "You've successfully deleted at least one todo! Enter 'o' to return to options."
+		input = gets.chomp
+	end
+
 end
 
