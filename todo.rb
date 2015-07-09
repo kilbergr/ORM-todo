@@ -56,9 +56,9 @@ class Todo
 		c = PGconn.new(:host => HOSTNAME, :dbname => DATABASE)
 		results = []
 		res = c.exec "SELECT * FROM todos";
-		res.each do |todos|
-			id = todo|'id'|
-			item = todo|'item'|
+		res.each do |todo|
+			id = todo['id']
+			item = todo['item']
 			results << Todo.new({:id => id, :item => item})
 		end
 		results
@@ -69,10 +69,15 @@ class Todo
 		@c.exec_params(sql,args)
 	end
 
-	def delete
+	def delete_one
 		sql = "DELETE FROM todos WHERE id=$1"
 		args = [id]
 		@c.exec_params(sql, args)
+	end
+
+	def self.delete_all
+		c = PGconn.new(:host => HOSTNAME, :dbname => DATABASE)
+		c.exec "DELETE FROM todos"
 	end
 
 	def update(args)
@@ -92,6 +97,7 @@ class Todo
 	end
 end
 
+#Made already Todo.make_todo_table
 
 puts "Welcome to the todo app, what would you like to do? Enter specified key for following result.
 o - see options
@@ -102,8 +108,8 @@ d [id] - delete a todo with a given id, if no id is provided, all todos will be 
 q - quit the application"
 
 input = gets.chomp
-until input == q
-	if input == o
+until input == "q"
+	if input == "o"
 		puts %q{Welcome to the todo app, what would you like to do? Enter specified key for following result.
 		o - see options
 		n - make a new todo
@@ -114,24 +120,26 @@ until input == q
 		input = gets.chomp
 	end
 
-	if input == n
+	if input == "n"
 		puts "Please enter the todo:"
 		new_todo = gets.chomp
-		todo = Todo.new({:id => id, :item => new_todo})
+		todo = Todo.new({:item => new_todo})
 		todo.save
 		todo.close
 		puts "You've successfully added a todo! Enter 'o' to return to options."
 		input = gets.chomp
 	end
 
-	if input == l
+	if input == "l"
 		puts Todo.all
 		puts "What next? Enter 'o' to return to options."
 		input = gets.chomp
 	end
 
-	if input == u[id]
-		todo.find(id)
+	if input == "u"
+		puts "Please enter the id of the todo you'd like to update:"
+		todo_id = gets.chomp
+		todo.find(todo_id)
 		puts "Please enter your updated todo:"
 		updated_todo = gets.chomp
 		todo.update(updated_todo)
@@ -139,10 +147,18 @@ until input == q
 		input = gets.chomp
 	end
 
-	if input == d[id]
-		todo.find(id)
-		todo.delete
-		puts "You've successfully deleted at least one todo! Enter 'o' to return to options."
+	if input == "d"
+		puts "Please enter the id of the todo you'd like to delete:"
+		todo_id = gets.chomp
+		if todo_id == nil
+			Todo.delete_all
+			puts "You've successfully deleted all todos! Enter 'o' to return to options."
+		else 
+			todo.find(todo_id)
+			todo.find(id)
+			todo.delete_one
+			puts "You've successfully deleted a todo! Enter 'o' to return to options."
+		end
 		input = gets.chomp
 	end
 
